@@ -1,0 +1,39 @@
+auth-server: http://localhost # 认证服务器地址
+
+server:
+  port: 8082
+  tomcat:
+    uri-encoding: UTF-8
+
+security:
+#  ignored: /favicon.ico,/scripts/**,/styles/**,/images/**
+#  sessions: ALWAYS
+  oauth2:
+    sso:
+      loginPath: /login
+    client:
+      client-id: client
+      client-secret: secret
+      access-token-uri: ${auth-server}/oauth/token
+      user-authorization-uri: ${auth-server}/oauth/authorize
+      client-authentication-scheme: form
+    resource:
+      token-info-uri: ${auth-server}/oauth/check_token # 验证token的接口
+
+securityconfig:
+  logoutsuccssurl: /tosignout
+  permitall: /rest/**,/re**
+  deniedpage: /deny
+  urlroles: /**/new/** = admin;
+            /**/edit/** = admin,editor;
+            /**/delete/** = admin
+# 配置一个路由资源
+# 其中 path 设定资源的访问路径，url 指定路由的服务方
+# 访问链接：http://localhost:8082/resource/user
+zuul:
+  routes:
+    resource:
+      path: /resource/**
+      url: http://localhost:8083
+      stripPrefix: true
+      retryable:
